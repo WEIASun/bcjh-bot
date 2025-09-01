@@ -25,5 +25,6 @@ type ChefData struct {
 	Tasty         int    `json:"tasty"`
 	SkillId       int    `json:"skill"`
 	UltimateGoals []int  `json:"ultimateGoal"`
-	UltimateSkill int    `json:"ultimateSkill"`
+	UltimateSkill []int  `json:"ultimateSkillList"`
+	DiskDesc      string `json:"diskDesc"`
 }
