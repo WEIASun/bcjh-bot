@@ -30,7 +30,15 @@ func FindAllChefs() ([]database.Chef, error) {
 		}
 		for i := range results {
 			results[i].SkillDesc = mSkills[results[i].SkillId].Description
-			results[i].UltimateSkillDesc = mSkills[results[i].UltimateSkill].Description
+
+			// 处理多个终极技能
+			var ultimateSkillDescs []string
+			for _, skillId := range results[i].UltimateSkill {
+				if skill, exists := mSkills[skillId]; exists {
+					ultimateSkillDescs = append(ultimateSkillDescs, skill.Description)
+				}
+			}
+			results[i].UltimateSkillDesc = strings.Join(ultimateSkillDescs, "，")
 		}
 
 		*dest.(*[]database.Chef) = results

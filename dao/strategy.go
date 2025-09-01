@@ -85,7 +85,8 @@ func SearchStrategiesWithKeyword(keyword string) ([]database.Strategy, error) {
 	return result, nil
 }
 
-func CreateStrategy(keyword string, value string) error {
+// CreateStrategy 创建新的攻略
+func CreateStrategy(keyword, value, imagePaths string) error {
 	if keyword == "" || value == "" {
 		return errors.New("未填写关键词或内容")
 	}
@@ -95,6 +96,7 @@ func CreateStrategy(keyword string, value string) error {
 	_, err := DB.Insert(&database.Strategy{
 		Keyword: keyword,
 		Value:   value,
+		Image:   imagePaths, // 保存分号分隔的本地路径
 	})
 	if err != nil {
 		logger.Errorf("创建攻略 %s 失败 %v", keyword, err)
@@ -104,7 +106,8 @@ func CreateStrategy(keyword string, value string) error {
 	return nil
 }
 
-func UpdateStrategy(keyword string, value string) error {
+// UpdateStrategy 更新攻略（修改参数类型）
+func UpdateStrategy(keyword, value, imagePaths string) error {
 	if keyword == "" || value == "" {
 		return errors.New("未填写关键词或内容")
 	}
@@ -114,6 +117,7 @@ func UpdateStrategy(keyword string, value string) error {
 	affected, err := DB.Where("keyword = ?", keyword).Update(&database.Strategy{
 		Keyword: keyword,
 		Value:   value,
+		Image:   imagePaths, // 保存分号分隔的本地路径
 	})
 	if err != nil {
 		logger.Errorf("更新攻略 %s 失败 %v", keyword, err)
@@ -127,6 +131,7 @@ func UpdateStrategy(keyword string, value string) error {
 	return nil
 }
 
+// DeleteStrategyByKeyword 根据关键词删除攻略
 func DeleteStrategyByKeyword(keyword string) error {
 	if keyword == "" {
 		return errors.New("未填写要移除的攻略关键词")
