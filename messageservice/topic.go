@@ -17,17 +17,17 @@ import (
 )
 
 const (
-	StrategyImageSaveDir = "./images/strategies"
-	ImageServerBaseURL   = "http://localhost:8080" // 静态文件服务地址
+	TopicImageSaveDir       = "./images/topics"
+	TopicImageServerBaseURL = "http://localhost:8080" // 静态文件服务地址
 )
 
 func init() {
-	if err := os.MkdirAll(StrategyImageSaveDir, os.ModePerm); err != nil {
-		logger.Errorf("创建攻略图片目录失败: %v", err)
+	if err := os.MkdirAll(TopicImageSaveDir, os.ModePerm); err != nil {
+		logger.Errorf("创建主题图片目录失败: %v", err)
 	}
 }
 
-func StrategyQuery(c *scheduler.Context) {
+func TopicQuery(c *scheduler.Context) {
 	arg := c.PretreatedMessage
 
 	if util.HasPrefixIn(arg, "新增", "添加") {
@@ -44,16 +44,16 @@ func StrategyQuery(c *scheduler.Context) {
 		keyword := strings.TrimSpace(params[1])
 		value := strings.TrimSpace(params[2])
 
-		modifiedValue, imagePaths, err := processStrategyImagesInContent(value, keyword)
+		modifiedValue, imagePaths, err := processTopicImagesInContent(value, keyword)
 		if err != nil {
 			_, _ = c.Reply(fmt.Sprintf("图片处理失败: %v", err))
 			return
 		}
 
-		if err := dao.CreateStrategy(keyword, modifiedValue, imagePaths); err != nil {
+		if err := dao.CreateTopic(keyword, modifiedValue, imagePaths); err != nil {
 			_, _ = c.Reply(err.Error())
 		} else {
-			msg := fmt.Sprintf("✅ 攻略「%s」添加成功！\n📝 内容：%s", keyword, modifiedValue)
+			msg := fmt.Sprintf("✅ 主题「%s」添加成功！\n📝 内容：%s", keyword, modifiedValue)
 			if imagePaths != "" {
 				msg += fmt.Sprintf("\n🖼 本地图片路径：%s", strings.ReplaceAll(imagePaths, ";", "\n"))
 			}
@@ -76,16 +76,16 @@ func StrategyQuery(c *scheduler.Context) {
 		keyword := strings.TrimSpace(params[1])
 		value := strings.TrimSpace(params[2])
 
-		modifiedValue, imagePaths, err := processStrategyImagesInContent(value, keyword)
+		modifiedValue, imagePaths, err := processTopicImagesInContent(value, keyword)
 		if err != nil {
 			_, _ = c.Reply(fmt.Sprintf("图片处理失败: %v", err))
 			return
 		}
 
-		if err := dao.UpdateStrategy(keyword, modifiedValue, imagePaths); err != nil {
+		if err := dao.UpdateTopic(keyword, modifiedValue, imagePaths); err != nil {
 			_, _ = c.Reply(err.Error())
 		} else {
-			msg := fmt.Sprintf("🔄 攻略「%s」更新成功！\n📝 新内容：%s", keyword, modifiedValue)
+			msg := fmt.Sprintf("🔄 主题「%s」更新成功！\n📝 新内容：%s", keyword, modifiedValue)
 			if imagePaths != "" {
 				msg += fmt.Sprintf("\n🖼 本地图片路径：%s", strings.ReplaceAll(imagePaths, ";", "\n"))
 			}
@@ -105,17 +105,17 @@ func StrategyQuery(c *scheduler.Context) {
 			return
 		}
 		keyword := strings.TrimSpace(params[1])
-		if err := dao.DeleteStrategyByKeyword(keyword); err != nil {
+		if err := dao.DeleteTopicByKeyword(keyword); err != nil {
 			_, _ = c.Reply(err.Error())
 		} else {
-			_, _ = c.Reply(fmt.Sprintf("🗑 攻略「%s」已删除！", keyword))
+			_, _ = c.Reply(fmt.Sprintf("🗑 主题「%s」已删除！", keyword))
 		}
 		return
 	}
 
-	keywords, err := dao.LoadStrategyKeywords()
+	keywords, err := dao.LoadTopicKeywords()
 	if err != nil {
-		logger.Errorf("获取攻略关键词列表失败: %v", err)
+		logger.Errorf("获取主题关键词列表失败: %v", err)
 		_, _ = c.Reply(e.SystemErrorNote)
 		return
 	}
@@ -136,7 +136,7 @@ func StrategyQuery(c *scheduler.Context) {
 	case 0:
 		_, _ = c.Reply("这个有点难，我还没学会呢")
 	case 1:
-		result, err := dao.GetStrategyByKeyword(matchList[0])
+		result, err := dao.GetTopicByKeyword(matchList[0])
 		if err != nil {
 			_, _ = c.Reply(e.SystemErrorNote)
 			return
@@ -144,13 +144,13 @@ func StrategyQuery(c *scheduler.Context) {
 		replyMsg := result.Value
 		_, _ = c.Reply(replyMsg)
 	default:
-		msg := "这些攻略你想看哪条呀?\n"
+		msg := "这些主题你想看哪条呀?\n"
 		msg += strings.Join(matchList, "\n")
 		_, _ = c.Reply(msg)
 	}
 }
 
-func processStrategyImagesInContent(content, keyword string) (string, string, error) {
+func processTopicImagesInContent(content, keyword string) (string, string, error) {
 	re := regexp.MustCompile(`\[CQ:image,([^]]+)\]`)
 	matches := re.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
@@ -172,14 +172,14 @@ func processStrategyImagesInContent(content, keyword string) (string, string, er
 		// 下载图片到本地
 		timestamp := time.Now().UnixNano()
 		fileName := fmt.Sprintf("%s_%d_%d.png", keyword, timestamp, i)
-		savePath := filepath.Join(StrategyImageSaveDir, fileName)
-		if err := downloadStrategyImage(imageURL, savePath); err != nil {
+		savePath := filepath.Join(TopicImageSaveDir, fileName)
+		if err := downloadImage(imageURL, savePath); err != nil {
 			return "", "", fmt.Errorf("下载图片失败: %v", err)
 		}
 		imagePaths = append(imagePaths, savePath)
 
 		// 生成 HTTP URL（替换本地路径为服务地址）
-		httpURL := fmt.Sprintf("%s/strategies/%s", ImageServerBaseURL, fileName)
+		httpURL := fmt.Sprintf("%s/topics/%s", TopicImageServerBaseURL, fileName)
 
 		// 构造新参数：替换file字段为HTTP URL，删除url字段
 		newParams := strings.Replace(params, urlMatch[0], "", 1)
@@ -205,7 +205,8 @@ func processStrategyImagesInContent(content, keyword string) (string, string, er
 
 	return modifiedContent, strings.Join(imagePaths, ";"), nil
 }
-func downloadStrategyImage(url, savePath string) error {
+
+func downloadImage(url, savePath string) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("创建请求失败: %v", err)

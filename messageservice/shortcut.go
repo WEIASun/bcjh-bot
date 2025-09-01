@@ -11,7 +11,7 @@ import (
 func GalleryWebsite(c *scheduler.Context) {
 	var msg string
 	foodgame := "https://foodgame.github.io/"
-	bcjh := "https://www.bcjh.xyz/"
+	bcjh := "https://h5.baochaojianghu.com/"
 
 	msg += fmt.Sprintf("L图鉴网: %s\n", foodgame)
 	msg += fmt.Sprintf("白菜菊花: %s", bcjh)
@@ -37,11 +37,11 @@ func BCJHAppDownload(c *scheduler.Context) {
 
 // 计算器，不用第二遍解释
 func Calculator(c *scheduler.Context) {
-	bcjh := "https://www.bcjh.xyz/"
-	imgPath := config.AppConfig.Resource.Shortcut + "/白菜菊花.jpg"
+	bcjh := "https://h5.baochaojianghu.com/"
+	//imgPath := config.AppConfig.Resource.Shortcut + "/白菜菊花.jpg"
 	var msg string
 	msg += fmt.Sprintf("网页版计算器在白菜菊花图鉴网:%s\n", bcjh)
-	msg += fmt.Sprintf("安卓用户支持使用白菜菊花app，扫描下图二维码下载 %s",
-		onebot.GetCQImage(imgPath, "file"))
+	//msg += fmt.Sprintf("安卓用户支持使用白菜菊花app，扫描下图二维码下载 %s",
+	//onebot.GetCQImage(imgPath, "file"))
 	_, _ = c.Reply(msg)
 }

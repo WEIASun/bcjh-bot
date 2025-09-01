@@ -11,9 +11,6 @@ import (
 	"bcjh-bot/util/e"
 	"bcjh-bot/util/logger"
 	"fmt"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
-	"github.com/nfnt/resize"
 	"image"
 	"image/color"
 	"image/draw"
@@ -21,6 +18,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
+	"github.com/nfnt/resize"
 )
 
 func ChefQuery(c *scheduler.Context) {
@@ -241,14 +242,40 @@ func echoChefMessage(chef database.Chef) string {
 		for p, ultimateGoal := range ultimateGoals {
 			goals += fmt.Sprintf("\n%d.%s", p+1, ultimateGoal.Goal)
 		}
+		var ultimateSkillDescs []string
+		for _, skillId := range chef.UltimateSkill {
+			if skill, exists := mSkills[skillId]; exists {
+				ultimateSkillDescs = append(ultimateSkillDescs, skill.Description)
+			}
+		}
+		ultimateSkillDesc := strings.Join(ultimateSkillDescs, ",")
+
+		condiments := map[string]int{
+			"甜": chef.Sweet,
+			"辣": chef.Spicy,
+			"酸": chef.Sour,
+			"咸": chef.Salty,
+			"苦": chef.Bitter,
+			"鲜": chef.Tasty,
+		}
+		var condimentLine string
+		for name, value := range condiments {
+			if value > 0 {
+				condimentLine = fmt.Sprintf("%s:%d", name, value)
+				break // 因为只有一个有数值，找到后就可以跳出循环
+			}
+		}
+
 		msg += fmt.Sprintf("%s %s %s\n", chef.GalleryId, chef.Name, gender)
 		msg += fmt.Sprintf("%s\n", strings.Repeat("🔥", chef.Rarity))
 		msg += fmt.Sprintf("来源: %s\n", chef.Origin)
 		msg += fmt.Sprintf("炒:%d 烤:%d 煮:%d\n", chef.Stirfry, chef.Bake, chef.Boil)
 		msg += fmt.Sprintf("蒸:%d 炸:%d 切:%d\n", chef.Steam, chef.Fry, chef.Cut)
 		msg += fmt.Sprintf("🍖:%d 🍞:%d 🥕:%d 🐟:%d\n", chef.Meat, chef.Flour, chef.Vegetable, chef.Fish)
+		msg += fmt.Sprintf("调料:%s\n", condimentLine)
 		msg += fmt.Sprintf("技能:%s\n", mSkills[chef.SkillId].Description)
-		msg += fmt.Sprintf("修炼效果:%s\n", mSkills[chef.UltimateSkill].Description)
+		msg += fmt.Sprintf("修炼效果:%s\n", ultimateSkillDesc)
+		msg += fmt.Sprintf("心法盘:%s\n", chef.DiskDesc)
 		msg += fmt.Sprintf("修炼任务:%s", goals)
 	}
 	return msg

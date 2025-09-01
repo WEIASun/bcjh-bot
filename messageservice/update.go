@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"image"
 	"image/png"
 	"io"
@@ -23,6 +22,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -401,6 +402,7 @@ func updateChefs(chefsData []gamedata.ChefData) error {
 			SkillId:       chefData.SkillId,
 			UltimateGoals: chefData.UltimateGoals,
 			UltimateSkill: chefData.UltimateSkill,
+			DiskDesc:      strings.ReplaceAll(chefData.DiskDesc, "<br>", ", "),
 		}
 		if len(chefData.Tags) > 0 {
 			chef.Gender = chefData.Tags[0]

@@ -185,6 +185,23 @@ func strategyHelp() string {
 	return sb.String()
 }
 
+// 主题功能指引
+func themeHelp() string {
+	keywords, err := dao.LoadTopicKeywords()
+	if err != nil {
+		logger.Errorf("查询主题列表失败 %v", err)
+		return e.SystemErrorNote
+	}
+	sb := strings.Builder{}
+	sb.WriteString("【游戏主题查询】\n")
+	sb.WriteString("收录了游戏主题，查询方式:『#主题 关键词』\n")
+	sb.WriteString("目前收录了以下内容:\n")
+	for _, keyword := range keywords {
+		sb.WriteString(fmt.Sprintf("「%s」 ", keyword))
+	}
+	return sb.String()
+}
+
 // importDataHelp 导入数据功能指引
 func importDataHelp() string {
 	prefix := prefixCharacters[0]
