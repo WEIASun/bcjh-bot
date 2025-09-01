@@ -2,6 +2,7 @@ package database
 
 import (
 	"time"
+
 	"xorm.io/xorm"
 	"xorm.io/xorm/migrate"
 )
@@ -26,6 +27,7 @@ var tables = []interface{}{
 	&RecipeMaterial{},
 	&Skill{},
 	&Strategy{},
+	&Topic{},
 	&Tarot{},
 	&UserData{},
 }

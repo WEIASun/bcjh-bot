@@ -2,8 +2,8 @@ package database
 
 import "time"
 
-// Strategy 攻略数据
-type Strategy struct {
+// Topic 主题数据
+type Topic struct {
 	Id         int       `xorm:"id autoincr pk"`
 	Keyword    string    `xorm:"keyword"`
 	Value      string    `xorm:"value longtext"`
@@ -12,6 +12,6 @@ type Strategy struct {
 	UpdateTime time.Time `xorm:"'update_time' updated"`
 }
 
-func (Strategy) TableName() string {
-	return "strategy"
+func (Topic) TableName() string {
+	return "topic"
 }

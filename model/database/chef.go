@@ -28,7 +28,8 @@ type Chef struct {
 	Tasty         int    `xorm:"tasty"`            // 鲜
 	SkillId       int    `xorm:"skill_id"`         // 技能id
 	UltimateGoals []int  `xorm:"ultimate_goals"`   // 修炼任务id数组
-	UltimateSkill int    `xorm:"ultimate_skill"`   // 修炼效果id
+	UltimateSkill []int  `xorm:"ultimate_skill"`   // 修炼效果id
+	DiskDesc      string `xorm:"diskdesc"`         // 心法盘
 
 	SkillDesc         string `xorm:"-"` // 技能描述
 	UltimateSkillDesc string `xorm:"-"` // 修炼技能描述
